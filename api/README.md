@@ -1,5 +1,5 @@
-# wids
-WIDS project notes
+# Stanford Logo Generator
+Project Notes
 
 Fonts:
 - install in `~/.fonts` or `/usr/share/fonts/truetype[/font_name]`
@@ -94,4 +94,4 @@ The api can acceesed at
 `http://server_domain_or_IP/api/v1/`
 
 To restart the api
-`sudo service gunicorn restart`
+`sudo service gunicorn restart`Stan
