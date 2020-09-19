@@ -94,4 +94,4 @@ The api can acceesed at
 `http://server_domain_or_IP/api/v1/`
 
 To restart the api
-`sudo service gunicorn restart`Stan
+`sudo service gunicorn restart`
