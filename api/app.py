@@ -107,7 +107,7 @@ app.config["DEBUG"] = True
 
 @app.route('/', methods=['GET'])
 def home():
-    return '''<h1>WiDS Logo Generator</h1>'''
+    return '''<h1>Stanford Logo Generator</h1>'''
 
 @app.route('/api/v1/', methods=['POST'])
 def create():
