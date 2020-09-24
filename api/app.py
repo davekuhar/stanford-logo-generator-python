@@ -5,8 +5,6 @@ import re
 import cgi
 import pathlib
 import subprocess
-import wordninja
-import textwrap
 from shutil import rmtree
 from tempfile import mkdtemp, TemporaryFile
 from time import gmtime, strftime
@@ -107,22 +105,22 @@ app.config["DEBUG"] = True
 
 @app.route('/', methods=['GET'])
 def home():
-    return '''<h1>Stanford Logo Generator</h1>'''
+    return '''<h1>WiDS Logo Generator</h1>'''
 
 @app.route('/api/v1/', methods=['POST'])
 def create():
-    p1 = cgi.escape(request.json['p1'].strip()) 
-    p2 = request.json['p2'].strip() 
-    p3 = cgi.escape(request.json['p3'].strip()) 
+    p1 = cgi.escape(request.json['p1'].strip().upper())
+    p2 = cgi.escape(request.json['p2'].strip().upper())
+    p3 = cgi.escape(request.json['p3'].strip().upper())
     line_number = request.json['line_number']
     logo_number = request.json['logo_number']
 
 
     # If something was entered on line 2 but not line 1, flip it to line 1
-    # if len(p1) == 0 and len(p2) > 0:
-    #     p1 = p2
-    #     p2 = ''
-    #     p3 = ''
+    if len(p1) == 0 and len(p2) > 0:
+        p1 = p2
+        p2 = ''
+        p3 = ''
 
     # replace text in the SVGs one by one
     TEMPDIR = mkdtemp(suffix='', prefix='output', dir='/tmp')
@@ -141,7 +139,7 @@ def create():
     processes = []
     output_files = []
     for source_svg_file in SOURCE_SVG_LIST:
-        # print(source_svg_file, file=sys.stdout)
+        print(source_svg_file, file=sys.stdout)
         with open(SOURCE_SVG_PATH+source_svg_file, mode='r', encoding='utf-8') as file:
             source_svg_document = file.read()
         app.logger.info("loaded {}. Size: {}".format(source_svg_file, len(source_svg_file)))
@@ -183,73 +181,16 @@ def create():
         # p1 = text1
         # p2 = text2
         # p3 = text3
-        if (str(line_number) == "2" and str(logo_number) == "10") or (str(line_number) != "3" and str(logo_number) == "2") or (str(line_number) == "3" and str(logo_number) == "2"):
-            revised_svg_document = source_svg_document
-        else:
-            revised_svg_document = source_svg_document.replace('%PLACEHOLDER1%', p1)
 
+        revised_svg_document = source_svg_document.replace('%PLACEHOLDER1%', p1)
         app.logger.info("line_number: {} logo_number: {}".format(line_number, logo_number))
-
-        if (str(line_number) == "2" and str(logo_number) == "5") or (str(line_number) == "2" and str(logo_number) == "3"):
-            # words = wordninja.split(p2)
-            # first_line, second_line = ' '.join(words[:len(words)//2]), ' '.join(words[len(words)//2:])
-
-            width = len(p2)//2
-            text = p2
-            wrapper = textwrap.TextWrapper(width=width)
-            word_list = wrapper.wrap(text=text)
-            first_line = cgi.escape(word_list[0]) 
-            second_line = cgi.escape(' '.join(word_list[1:]))            
-
-            revised_svg_document = revised_svg_document.replace('%PLACEHOLDER2%', first_line)
-            revised_svg_document = revised_svg_document.replace('%PLACEHOLDER3%', second_line)
-        elif str(line_number) == "2" and str(logo_number) == "10":
-            if len(p2) > 0:
-                # words = wordninja.split(p2)
-                # first_line, second_line = ' '.join(words[:len(words)//2]), ' '.join(words[len(words)//2:])
-
-                width = len(p2)//2
-                text = p2
-                wrapper = textwrap.TextWrapper(width=width)
-                word_list = wrapper.wrap(text=text)
-                first_line = cgi.escape(word_list[0]) 
-                second_line = cgi.escape(' '.join(word_list[1:]))
-                
-                revised_svg_document = revised_svg_document.replace('%PLACEHOLDER1%', first_line)
-                revised_svg_document = revised_svg_document.replace('%PLACEHOLDER2%', second_line)
-            else:
-                first_line, second_line = p1, p2
-                revised_svg_document = revised_svg_document.replace('%PLACEHOLDER1%', first_line)
-                revised_svg_document = revised_svg_document.replace('%PLACEHOLDER2%', second_line)
-        elif str(line_number) == "3" and str(logo_number) == "1":
-            # words = wordninja.split(p2)
-            # first_line, second_line = ' '.join(words[:len(words)//2]), ' '.join(words[len(words)//2:])
-
-            width = len(p2)//2
-            text = p2
-            wrapper = textwrap.TextWrapper(width=width)
-            word_list = wrapper.wrap(text=text)
-            first_line = cgi.escape(word_list[0]) 
-            second_line = cgi.escape(' '.join(word_list[1:]))
-
+        if str(line_number) == "3" and str(logo_number) == "1":
+            # first_line, second_line = p2[:len(p2)//2],  p2[len(p2)//2:] 
+            first_line, second_line = (' '.join(p2.split(" ")[:3]) if len(p2.split(" ")) > 2 else p2), ' '.join(p2.split(" ")[3: len(p2.split(" "))])
+            # p2 = '<tspan x="0" y="12">{}</tspan><tspan x= "0" y="24">{}</tspan>'.format(first_line, second_line)
             revised_svg_document = revised_svg_document.replace('%PLACEHOLDER2_1%', first_line)
             revised_svg_document = revised_svg_document.replace('%PLACEHOLDER2_2%', second_line)
-        elif str(line_number) == "3" and str(logo_number) == "2":
-            # words = wordninja.split(p2)
-            # first_line, second_line = ' '.join(words[:len(words)//2]), ' '.join(words[len(words)//2:])
-
-            width = len(p2)//2
-            text = p2
-            wrapper = textwrap.TextWrapper(width=width)
-            word_list = wrapper.wrap(text=text)
-            first_line = cgi.escape(word_list[0]) 
-            second_line = cgi.escape(' '.join(word_list[1:]))
-
-            revised_svg_document = revised_svg_document.replace('%PLACEHOLDER1%', first_line)
-            revised_svg_document = revised_svg_document.replace('%PLACEHOLDER2%', second_line)
         else:
-            if (str(line_number) == "2" and str(logo_number) == "2") or (str(line_number) == "1" and str(logo_number) == "2"):
-                revised_svg_document = revised_svg_document.replace('%PLACEHOLDER1%', p1)
             revised_svg_document = revised_svg_document.replace('%PLACEHOLDER2%', p2)
         revised_svg_document = revised_svg_document.replace('%PLACEHOLDER3%', p3)
         master_svg_file = out_path(TEMPDIR, source_svg_file, 'mastersvg')
