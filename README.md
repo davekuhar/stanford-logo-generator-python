@@ -1,5 +1,4 @@
-# wids
-WIDS project notes
+# About stanford logo generator
 
 Fonts:
 - install in `~/.fonts` or `/usr/share/fonts/truetype[/font_name]`
