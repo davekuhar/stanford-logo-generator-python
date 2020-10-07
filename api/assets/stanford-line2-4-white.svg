@@ -21,10 +21,10 @@
                         </text>
                     </g>
                 </g>
-                <g id="%PLACEHOLDER1%" transform="translate(-15, 19.490000)" fill="#FFFFFF" fill-rule="nonzero" font-family="SourceSansPro-Semibold, Source Sans Pro" font-size="11.5" font-weight="500">
+                <g id="%PLACEHOLDER1%" transform="translate(40, 19.490000)" fill="#FFFFFF" fill-rule="nonzero" font-family="SourceSansPro-Semibold, Source Sans Pro" font-size="11.5" font-weight="500">
                     <g id="Group">
                         <text id="%PLACEHOLDER1%">
-                            <tspan text-anchor="start" x="0" y="11">%PLACEHOLDER1%</tspan>
+                            <tspan text-anchor="end" x="10%" y="11">%PLACEHOLDER1%</tspan>
                         </text>
                     </g>
                 </g>
