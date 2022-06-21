@@ -2,7 +2,7 @@ import sys
 import zipfile
 import io
 import re
-import cgi
+import html
 import pathlib
 import subprocess
 import wordninja
@@ -82,7 +82,7 @@ IMAGEMAGICK = '/usr/bin/convert'
 INKSCAPE = '/usr/bin/inkscape'
 
 # initialize INKSCAPE and X
-subprocess.run([INKSCAPE, '--without-gui'])
+subprocess.run(['/usr/bin/dbus-run-session', INKSCAPE, '--without-gui'])
 
 
 def out_path(tempdir, filename, new_extension=None):
@@ -113,7 +113,7 @@ def home():
 def create():
     p1 = request.json['p1'].strip() 
     p2 = request.json['p2'].strip() 
-    p3 = cgi.escape(request.json['p3'].strip()) 
+    p3 = html.escape(request.json['p3'].strip()) 
     line_number = request.json['line_number']
     logo_number = request.json['logo_number']
 
@@ -184,11 +184,11 @@ def create():
         # p2 = text2
         # p3 = text3
         if (int(line_number) == 2 and int(logo_number) == 4) or (int(line_number) == 2 and int(logo_number) == 5):
-            # p1 = p1.rjust(45, cgi.escape(' ')) 
+            # p1 = p1.rjust(45, html.escape(' ')) 
             missing = 45 - len(p1)
             spaces = ""
             for x in range(0, missing):
-                spaces += cgi.escape("\u00A0")
+                spaces += html.escape("\u00A0")
 
             # p1 = spaces + p1
 
@@ -197,7 +197,7 @@ def create():
         if (str(line_number) == "2" and str(logo_number) == "10") or (str(line_number) != "3" and str(logo_number) == "2") or (str(line_number) == "3" and str(logo_number) == "2"):
             revised_svg_document = source_svg_document
         else:
-            revised_svg_document = source_svg_document.replace('%PLACEHOLDER1%', cgi.escape(p1))
+            revised_svg_document = source_svg_document.replace('%PLACEHOLDER1%', html.escape(p1))
 
         app.logger.info("line_number: {} logo_number: {}".format(line_number, logo_number))
 
@@ -209,8 +209,8 @@ def create():
             text = p2
             wrapper = textwrap.TextWrapper(width=width, break_long_words=False)
             word_list = wrapper.wrap(text=text)
-            first_line = cgi.escape(word_list[0]) 
-            second_line = cgi.escape(' '.join(word_list[1:]))            
+            first_line = html.escape(word_list[0]) 
+            second_line = html.escape(' '.join(word_list[1:]))            
 
             revised_svg_document = revised_svg_document.replace('%PLACEHOLDER2%', first_line)
             revised_svg_document = revised_svg_document.replace('%PLACEHOLDER3%', second_line)
@@ -223,8 +223,8 @@ def create():
                 text = p2
                 wrapper = textwrap.TextWrapper(width=width, break_long_words=False)
                 word_list = wrapper.wrap(text=text)
-                first_line = cgi.escape(word_list[0]) 
-                second_line = cgi.escape(' '.join(word_list[1:]))
+                first_line = html.escape(word_list[0]) 
+                second_line = html.escape(' '.join(word_list[1:]))
                 
                 revised_svg_document = revised_svg_document.replace('%PLACEHOLDER1%', first_line)
                 revised_svg_document = revised_svg_document.replace('%PLACEHOLDER2%', second_line)
@@ -240,8 +240,8 @@ def create():
             text = p2
             wrapper = textwrap.TextWrapper(width=width, break_long_words=False)
             word_list = wrapper.wrap(text=text)
-            first_line = cgi.escape(word_list[0]) 
-            second_line = cgi.escape(' '.join(word_list[1:]))
+            first_line = html.escape(word_list[0]) 
+            second_line = html.escape(' '.join(word_list[1:]))
 
             revised_svg_document = revised_svg_document.replace('%PLACEHOLDER2_1%', first_line)
             revised_svg_document = revised_svg_document.replace('%PLACEHOLDER2_2%', second_line)
@@ -253,15 +253,15 @@ def create():
             text = p2
             wrapper = textwrap.TextWrapper(width=width, break_long_words=False)
             word_list = wrapper.wrap(text=text)
-            first_line = cgi.escape(word_list[0]) 
-            second_line = cgi.escape(' '.join(word_list[1:]))
+            first_line = html.escape(word_list[0]) 
+            second_line = html.escape(' '.join(word_list[1:]))
 
             revised_svg_document = revised_svg_document.replace('%PLACEHOLDER1%', first_line)
             revised_svg_document = revised_svg_document.replace('%PLACEHOLDER2%', second_line)
         else:
             if (str(line_number) == "2" and str(logo_number) == "2") or (str(line_number) == "1" and str(logo_number) == "2"):
-                revised_svg_document = revised_svg_document.replace('%PLACEHOLDER1%', cgi.escape(p1))
-            revised_svg_document = revised_svg_document.replace('%PLACEHOLDER2%', cgi.escape(p2))
+                revised_svg_document = revised_svg_document.replace('%PLACEHOLDER1%', html.escape(p1))
+            revised_svg_document = revised_svg_document.replace('%PLACEHOLDER2%', html.escape(p2))
         revised_svg_document = revised_svg_document.replace('%PLACEHOLDER3%', p3)
         master_svg_file = out_path(TEMPDIR, source_svg_file, 'mastersvg')
         open(master_svg_file, mode='w', encoding='utf-8').write(revised_svg_document)
@@ -270,7 +270,7 @@ def create():
 
         # generate PNG
         f = TemporaryFile(dir='/tmp')
-        p = subprocess.Popen([INKSCAPE, '--without-gui', '--file=' + master_svg_file, '--export-text-to-path',
+        p = subprocess.Popen(['/usr/bin/dbus-run-session', INKSCAPE, '--without-gui', '--file=' + master_svg_file, '--export-text-to-path',
                             '--export-dpi=600', '--export-background-opacity=0', '--export-png=' + png_file], stdout=f)
         processes.append((p, f))
         output_files.append(png_file)
@@ -323,7 +323,7 @@ def create():
         master_svg_file = out_path(TEMPDIR, source_svg_file, 'mastersvg')
         # p = subprocess.Popen([INKSCAPE,  '--without-gui', '--file=' + master_svg_file, '--export-text-to-path', 
         #                     '--export-ignore-filters', '--export-ps-level=3', '-E '+ eps_file], stdout=f)
-        p = subprocess.Popen([INKSCAPE, '--without-gui', '--file=' + master_svg_file, '--export-text-to-path',
+        p = subprocess.Popen(['/usr/bin/dbus-run-session', INKSCAPE, '--without-gui', '--file=' + master_svg_file, '--export-text-to-path',
                             '--export-eps=' + eps_file], stdout=f)
 
         processes.append((p, f))
@@ -347,7 +347,7 @@ def create():
         if 'white' in master_svg_file or 'black' in master_svg_file:
             pass
         else:
-            p = subprocess.Popen([INKSCAPE, '--without-gui', '--file=' + master_svg_file, '--export-text-to-path',
+            p = subprocess.Popen(['/usr/bin/dbus-run-session', INKSCAPE, '--without-gui', '--file=' + master_svg_file, '--export-text-to-path',
                                 '--export-plain-svg=' + svg_file], stdout=f)
             processes.append((p, f))
             output_files.append(svg_file)
